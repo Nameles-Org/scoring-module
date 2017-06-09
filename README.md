@@ -34,7 +34,7 @@ The docker image will be pulled automatically from docker hub.
 
 ## Running the scoring module
 
-We recommend [running the scoring module as a containerized service with docker-compose](#Running-the-module-as-a-containerized-service-with-docker-compose), however you can run it in native for testing as follows:
+We recommend [running the scoring module as a containerized service with docker-compose](#running-the-module-as-a-containerized-service-with-docker-compose), however you can run it in native for testing as follows:
 
 ```bash
 ./nameles-scoring -dbIP <127.0.0.1> -dbUSER <user> -dbNAME <nameles>

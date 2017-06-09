@@ -1,0 +1,19 @@
+version: "3"
+services:
+  scoring-module:
+    image: apastor/nameles-scoring-module
+    networks:
+      - default
+    restart: "no"
+    environment:
+      - DSP_IP=163.117.139.225
+      - FWD_PORT=58510
+      - RCV_PORT=58501
+      - SND_PORT=58505
+      - DB_IP=<database_host>
+      - DB_USER=<username>
+      - DB_PWD=<password>
+      - DB_NAME=nameles
+      - DB_DAY=161201
+      - WORKERS=4
+      - MIN_TOTAL=250

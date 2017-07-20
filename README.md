@@ -34,7 +34,7 @@ The docker image will be pulled automatically from docker hub.
 
 ## Running the scoring module
 
-We recommend [running the scoring module as a containerized service with docker-compose](#running-the-module-as-a-containerized-service-with-docker-compose), however you can run it in native for testing as follows:
+We recommend [running the scoring module as a containerized service with docker-compose](#running-the-module-as-a-containerized-service-with-docker-compose). However, you can run it in native for testing as follows:
 
 ```bash
 ./nameles-scoring -dbIP <127.0.0.1> -dbUSER <user> -dbNAME <nameles>
@@ -44,7 +44,7 @@ You need to specify at least the database parameters from where to extract the s
 
 The program accepts the following command line parameters:
 
-  - -MPS (Queries per second) type: int32 default: 30000
+  - -MPS (Queries per second) type: int default: 30000
   - -day (Day of the database to use for the hash tables in format YYMMDD))
    type: string default: "161201"
   - -dbIP (IP address of the database, data processing module) type: string
@@ -53,9 +53,9 @@ The program accepts the following command line parameters:
   - -dbPWD (password of the database) type: string default: "password"
   - -dbUSER (database user) type: string default: "user"
   - -dspIP (IP address of the DSP) type: string default: "127.0.0.1"
-  - -rcvport ("Receive from" port) type: int32 default: 58501
-  - -sndport ("Send to" port) type: int32 default: 58505
-  - -fwdport (Data analysis forwarding port) type: int32 default: 58510
+  - -rcvport ("Receive from" port) type: int default: 58501
+  - -sndport ("Send to" port) type: int default: 58505
+  - -fwdport (Data analysis forwarding port) type: int default: 58510
   - -min_total (Minimum number of visits to consider a domain score)
-      type: int32 default: 250
-  - -nWorkers (Number of workers) type: int32 default: 4
+      type: int default: 250
+  - -nWorkers (Number of workers) type: int default: 4

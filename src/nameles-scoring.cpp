@@ -39,7 +39,7 @@ typedef std::unordered_map<string, score_pair> lookup_map;
 
 // GLOBAL VARIABLES
 lookup_map referrerLookup;
-string sendToSocket, receiveFromSocket;
+string sendToSocket, receiveFromSocket, fwdToSocket;
 boost::thread_group workers;
 
 DEFINE_string(day, "161201", "Day of the database to use for the hash tables (in format YYMMDD)");
@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
 
 	sendToSocket = "tcp://" + FLAGS_dspIP + ":" + std::to_string(FLAGS_sndport);
 	receiveFromSocket = "tcp://" + FLAGS_dspIP + ":" + std::to_string(FLAGS_rcvport);
+	fwdToSocket = "tcp://" + FLAGS_dbIP + ":" + std::to_string(FLAGS_fwdport);
 
 	pqxx::connection c("dbname=" + FLAGS_dbNAME + " user="+ FLAGS_dbUSER + " host="+ FLAGS_dbIP + " password=" + FLAGS_dbPWD);
 	pqxx::read_transaction txn(c);
@@ -134,15 +135,19 @@ void worker_func(){
 
 	zmqpp::socket_t puller(context, zmqpp::socket_type::pull); //  Socket to receive messages on
 	zmqpp::socket_t reply_pusher(context, zmqpp::socket_type::push); //  Socket to send messages to
+	zmqpp::socket_t fwder(context, zmqpp::socket_type::push); //  Socket to foward messages for the data processing module
 	puller.set(zmqpp::socket_option::receive_timeout, 10000); // 10 seconds
-	reply_pusher.set(zmqpp::socket_option::send_timeout, 0); // 10 seconds
+	reply_pusher.set(zmqpp::socket_option::send_timeout, 0); // 0 seconds
+	fwder.set(zmqpp::socket_option::receive_timeout, 10000); // 10 seconds
 	try {
 		puller.connect(receiveFromSocket);
 		reply_pusher.connect(sendToSocket);
+		fwder.connect(fwdToSocket);
 	} catch (zmqpp::zmq_internal_exception &e){
 		cout << "Exception: " << e.what() << endl;
 		puller.close();
 		reply_pusher.close();
+		fwder.close();
 		context.terminate();
 		return;
 	}
@@ -162,6 +167,7 @@ void worker_func(){
 			if (ref_it != referrerLookup.end()){
 				reply << reqID << ref_it->second.first << ref_it->second.second;
 				reply_pusher.send(reply);//,true);
+				fwder.send(query);
 			}
 //			cout << t0.tv_nsec << ' ' << t1.tv_nsec << ' ' << latency << endl;
 //			cout << reqID << " - " << referrer.c_str() << " - " << ip << endl;
@@ -173,5 +179,6 @@ void worker_func(){
 
 	// puller.close();
 	// reply_pusher.close();
+	// fwder.close();
 	//context.terminate();
 }

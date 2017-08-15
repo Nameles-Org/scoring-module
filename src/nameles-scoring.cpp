@@ -99,6 +99,8 @@ int main(int argc, char *argv[]) {
 	sigaction(SIGINT, &sigIntHandler, NULL);
 
 	workers.join_all();
+	updaterThread.interrupt();
+	updaterThread.join();
 
 	return 0;
 }

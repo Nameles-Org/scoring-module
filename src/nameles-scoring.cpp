@@ -53,7 +53,7 @@ DEFINE_int32(nWorkers, 4, "Number of workers");
 DEFINE_int32(rcvport, 58501, "\"Receive from\" port");
 DEFINE_int32(sndport, 58505, "\"Send to\" port");
 DEFINE_int32(fwdport, 58510, "Data analysis forwarding port (at database host)");
-DEFINE_int32(notifyport, 58520, "Port for listening notifications of score updates");
+DEFINE_int32(notifyport, 58520, "Port for listening notifications of score updates (0 for none)");
 DEFINE_int32(min_total, 250, "Minimum number of visits to consider a domain score");
 
 void SIGINT_handler(int s){
@@ -63,7 +63,7 @@ void SIGINT_handler(int s){
 
 void worker_func();
 void score_updates_listener(const string& scoreUpdatesSocket, const string& db_connect, const int min_total);
-std::shared_ptr<lookup_map> retrieve_scores(const string& db_connect, const string& day);
+std::shared_ptr<lookup_map> retrieve_scores(const string& db_connect, const string& day, const int min_total);
 
 
 int main(int argc, char *argv[]) {
@@ -71,15 +71,18 @@ int main(int argc, char *argv[]) {
 
 	sendToSocket = "tcp://" + FLAGS_dspIP + ":" + std::to_string(FLAGS_sndport);
 	receiveFromSocket = "tcp://" + FLAGS_dspIP + ":" + std::to_string(FLAGS_rcvport);
-	fwdToSocket = "tcp://" + FLAGS_dbIP + ":" + std::to_string(FLAGS_fwdport);
-
+  if (FLAGS_fwdport!=0){
+	   fwdToSocket = "tcp://" + FLAGS_dbIP + ":" + std::to_string(FLAGS_fwdport);
+  } else {
+		fwdToSocket = "none";
+	}
 	string scoreUpdatesSocket("tcp://" + FLAGS_dbIP + ":" + std::to_string(FLAGS_notifyport));
 
 	string db_connect("dbname=" + FLAGS_dbNAME + " user="+ FLAGS_dbUSER + " host="+ FLAGS_dbIP + " password=" + FLAGS_dbPWD);
 
 	std::shared_ptr<lookup_map> newLookup;
 	if (FLAGS_initday != "none"){
-	newLookup = retrieve_scores(db_connect, FLAGS_initday);
+	newLookup = retrieve_scores(db_connect, FLAGS_initday, FLAGS_min_total);
 } else {
 	newLookup = std::make_shared<lookup_map>();
 }
@@ -119,7 +122,9 @@ void worker_func(){
 	try {
 		puller.connect(receiveFromSocket);
 		reply_pusher.connect(sendToSocket);
-		fwder.connect(fwdToSocket);
+		if (fwdToSocket!= "none"){
+			fwder.connect(fwdToSocket);
+		}
 	} catch (zmqpp::zmq_internal_exception &e){
 		cout << "Exception: " << e.what() << endl;
 		puller.close();
@@ -145,7 +150,9 @@ void worker_func(){
 			if (ref_it != lookupTable->end()){
 				reply << reqID << ref_it->second.first << ref_it->second.second;
 				reply_pusher.send(reply);//,true);
-				fwder.send(query);
+				if (fwdToSocket!= "none"){
+					fwder.send(query);
+				}
 			}
 //			cout << t0.tv_nsec << ' ' << t1.tv_nsec << ' ' << latency << endl;
 //			cout << reqID << " - " << referrer.c_str() << " - " << ip << endl;
@@ -180,7 +187,7 @@ void score_updates_listener(const string& scoreUpdatesSocket, const string& db_c
 			//  Wait for next request from client
 			socket.receive(msg);
 			msg.get(msg_str, 0);
-			std::atomic_store(&referrerLookup, retrieve_scores(db_connect, FLAGS_initday));
+			std::atomic_store(&referrerLookup, retrieve_scores(db_connect, FLAGS_initday, FLAGS_min_total));
 	}
 	socket.close();
 	context.terminate();

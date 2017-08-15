@@ -11,7 +11,7 @@ BIN=nameles-scoring
 all: $(BIN)
 
 $(BIN): $(SRCDIR)$(SRC)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(BIN) $(SRCDIR)$(SRC) $(LDLIBS) 
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $(BIN) $(SRCDIR)$(SRC) $(LDLIBS)
 
 .PHONY: clean
 

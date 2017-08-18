@@ -78,7 +78,8 @@ int main(int argc, char *argv[]) {
 	}
 	string scoreUpdatesSocket("tcp://" + FLAGS_dbIP + ":" + std::to_string(FLAGS_notifyport));
 
-	string db_connect("dbname=" + FLAGS_dbNAME + " user="+ FLAGS_dbUSER + " host="+ FLAGS_dbIP + " password=" + FLAGS_dbPWD);
+	string db_connect("dbname=" + FLAGS_dbNAME + " user="+ FLAGS_dbUSER +
+                    " host="+ FLAGS_dbIP + "port=5430 password=" + FLAGS_dbPWD);
 
 	std::shared_ptr<lookup_map> newLookup;
 	if (FLAGS_initday != "none"){

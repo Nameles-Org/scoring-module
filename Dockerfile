@@ -1,4 +1,4 @@
-FROM apastor/debian-zmqpp
+FROM apastor/debian-zmqpp:stretch
 
 ENV RCV_PORT 58501
 ENV SND_PORT 58505

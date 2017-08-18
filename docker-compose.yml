@@ -6,8 +6,8 @@ services:
       - default
     restart: "no"
     environment:
-      - DSP_IP=163.117.139.225
-      - FWD_PORT=58510
+      - DSP_IP=127.0.0.1
+      - FWD_PORT= # 0 for not forwarding when not using the streaming module.
       - RCV_PORT=58501
       - SND_PORT=58505
       - DB_IP=<database_host>

@@ -14,5 +14,5 @@ RUN make
 EXPOSE $RCV_PORT $SND_PORT
 
 ENTRYPOINT /scoring-module/nameles-scoring -dspIP $DSP_IP -rcvport $RCV_PORT -sndport $SND_PORT \
-    -dbIP $DB_IP -dbUSER $DB_USER -dbPWD $DB_PWD -dbNAME $DB_NAME -day $DB_DAY \
+    -dbIP $DB_IP -dbUSER $DB_USER -dbPWD $DB_PWD -dbNAME $DB_NAME \
     -nWorkers $WORKERS -fwdport $FWD_PORT -min_total $MIN_TOTAL

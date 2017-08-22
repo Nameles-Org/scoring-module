@@ -3,17 +3,23 @@ services:
   scoring-module:
     image: apastor/nameles-scoring-module
     networks:
-      - default
+      nameles-net:
+        ipv4_address:  172.20.0.129
     restart: "no"
+    expose:
+      - "58520"
     environment:
-      - DSP_IP=127.0.0.1
-      - FWD_PORT= # 0 for not forwarding when not using the streaming module.
+      - DSP_IP=172.20.0.130
+      - FWD_PORT=58510 # 0 for not forwarding when not using the streaming module.
       - RCV_PORT=58501
       - SND_PORT=58505
-      - DB_IP=<database_host>
-      - DB_USER=<username>
-      - DB_PWD=<password>
+      - DB_IP=172.20.0.128
+      - DB_USER=nameles
+      - DB_PWD=""
       - DB_NAME=nameles
-      - DB_DAY=161201
-      - WORKERS=4
+      - WORKERS=2
       - MIN_TOTAL=250
+
+networks:
+  nameles-net:
+    external: true

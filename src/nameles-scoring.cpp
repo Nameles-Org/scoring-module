@@ -82,12 +82,17 @@ int main(int argc, char *argv[]) {
                     " host="+ FLAGS_dbIP + "port=5430 password=" + FLAGS_dbPWD);
 
 	std::shared_ptr<lookup_map> newLookup;
+
+  cout << "retrieving scores..." << endl;
+
 	if (FLAGS_initday != "none"){
 	newLookup = retrieve_scores(db_connect, FLAGS_initday, FLAGS_min_total);
 } else {
 	newLookup = std::make_shared<lookup_map>();
 }
 	std::atomic_store(&referrerLookup, newLookup);
+
+cout << "done" << endl;
 
 	for( int x=0; x<FLAGS_nWorkers; ++x ) {
 	    workers.create_thread(worker_func);
@@ -144,16 +149,19 @@ void worker_func(){
 		if (puller.receive(query)){
 			query.get(reqID, 0);
 			query.get(referrer, 1);
-			//	query.get(ip, 2);
+			// query.get(ip, 2);
 			// cout << reqID << " " << referrer << " " << ip << endl;
 			auto lookupTable = std::atomic_load(&referrerLookup);
 			ref_it = lookupTable->find(referrer);
 			if (ref_it != lookupTable->end()){
 				reply << reqID << ref_it->second.first << ref_it->second.second;
 				reply_pusher.send(reply);//,true);
-				if (fwdToSocket!= "none"){
-					fwder.send(query);
-				}
+			} else {
+				reply << reqID << -1 << -1;
+				reply_pusher.send(reply);//,true);
+			}
+			if (fwdToSocket!= "none"){
+				fwder.send(query);
 			}
 //			cout << t0.tv_nsec << ' ' << t1.tv_nsec << ' ' << latency << endl;
 //			cout << reqID << " - " << referrer.c_str() << " - " << ip << endl;
